@@ -1,5 +1,8 @@
+
 import audio.StdSound;
 import figuras.Sprite;
+import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -13,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Timer;
+
 /**
  *
  * @author victor
@@ -22,12 +26,12 @@ public class App extends javax.swing.JFrame {
     Set<Integer> teclasPulsadas;
     BufferedImage buffer;
     Timer timer;
-    
+
     // Sprites
     Sprite pajaro;
+    Sprite fruta;
     BufferedImage fondo;
-    
-    
+
     public App() {
         initComponents();
         teclasPulsadas = new HashSet<>();
@@ -68,22 +72,44 @@ public class App extends javax.swing.JFrame {
         g.drawImage(buffer, 0, 0, null);
     }
 
-    
     private void pintarFotograma() {
         Graphics2D g = (Graphics2D) buffer.getGraphics();
-        
+        g.setBackground(Color.yellow);
+        g.clearRect(0, 0, getWidth(), getHeight());
         pajaro.dibujar(g);
+        fruta.dibujar(g);
+        if (teclasPulsadas.contains(KeyEvent.VK_LEFT)) {
+            pajaro.setX(pajaro.getX() - 2);
+            pajaro.skinRotate();
+        }
+        if (teclasPulsadas.contains(KeyEvent.VK_RIGHT)) {
+            pajaro.setX(pajaro.getX() + 2);
+            pajaro.skinRotate();
+        }
+        if (teclasPulsadas.contains(KeyEvent.VK_UP)) {
+            pajaro.setY(pajaro.getY() - 2);
+            pajaro.skinRotate();
+        }
+        if (teclasPulsadas.contains(KeyEvent.VK_DOWN)) {
+            pajaro.setY(pajaro.getY() + 2);
+            pajaro.skinRotate();
+        }
+        if (pajaro.colisonaCon(fruta)) {
+            StdSound.play("assets\\audio\\whoop.au");
+        }
         repaint();
     }
-    
+
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         // Crear un temporizador e inicializarlo
-        timer = new Timer(40, (e) -> {pintarFotograma();});
+        timer = new Timer(40, (e) -> {
+            pintarFotograma();
+        });
         timer.start();
-        
+
         // Crear el buffer
         buffer = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_RGB);
-        
+
         // Crear el manejador de eventos de teclado
         addKeyListener(new KeyListener() {
             @Override
@@ -102,7 +128,7 @@ public class App extends javax.swing.JFrame {
                 teclasPulsadas.remove(e.getKeyCode());
             }
         });
-        
+
         // Imagen de fondo       
         try {
             fondo = ImageIO.read(new File("assets\\img\\nature-background.jpg"));
@@ -111,12 +137,17 @@ public class App extends javax.swing.JFrame {
             System.err.println(ex.getMessage());
         }
         // Sprites
-        pajaro = new Sprite(new String[] {
+        pajaro = new Sprite(new String[]{
             "assets\\img\\yellowbird-upflap.png",
             "assets\\img\\yellowbird-midflap.png",
-            "assets\\img\\yellowbird-downflap.png",
-        });
+            "assets\\img\\yellowbird-downflap.png",});
+        pajaro.setX(300);
+        pajaro.setY(300);
+        pajaro.skinStartRotation(0, 3, 3);
         
+        fruta = new Sprite(new String[]{"assets\\img\\strawberry.png"});
+        fruta.setX(200);
+        fruta.setY(100);
     }//GEN-LAST:event_formWindowOpened
 
     /**
